@@ -1,7 +1,9 @@
 #[macro_use]
 extern crate anyhow;
 
+use clap::{App, AppSettings, SubCommand};
 use std::process::exit;
+
 // NOTE: use async_std::task::block_on as soon as it supports process::Command.
 use tokio::runtime::current_thread::Runtime;
 
@@ -19,5 +21,14 @@ async fn main_() -> anyhow::Result<()> {
         return Err(anyhow!("root is required for this operation"));
     }
 
-    system76_support::generate_logs().await
+    let matches = App::new("system76-support")
+        .about("System76 support utility")
+        .setting(AppSettings::SubcommandRequired)
+        .subcommand(SubCommand::with_name("logs").about("generates logs for the support team"))
+        .get_matches();
+
+    match matches.subcommand() {
+        ("logs", _) => system76_support::generate_logs().await,
+        _ => unreachable!(),
+    }
 }
