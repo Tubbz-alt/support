@@ -2,7 +2,8 @@
 extern crate anyhow;
 
 use clap::{App, AppSettings, SubCommand};
-use std::process::exit;
+use fern::{Dispatch, InitError};
+use std::{io, process::exit};
 
 // NOTE: use async_std::task::block_on as soon as it supports process::Command.
 use tokio::runtime::current_thread::Runtime;
@@ -21,6 +22,10 @@ async fn main_() -> anyhow::Result<()> {
         return Err(anyhow!("root is required for this operation"));
     }
 
+    if let Err(why) = install_logger() {
+        eprintln!("failed to set up logging: {}", why);
+    }
+
     let matches = App::new("system76-support")
         .about("System76 support utility")
         .setting(AppSettings::SubcommandRequired)
@@ -31,4 +36,20 @@ async fn main_() -> anyhow::Result<()> {
         ("logs", _) => system76_support::generate_logs().await,
         _ => unreachable!(),
     }
+}
+
+fn install_logger() -> Result<(), InitError> {
+    Dispatch::new()
+        .level(log::LevelFilter::Off)
+        .level_for("system76_support", log::LevelFilter::Info)
+        .format(move |out, message, record| {
+            out.finish(format_args!(
+                "{}",
+                message
+            ))
+        })
+        .chain(io::stderr())
+        .apply()?;
+    
+    Ok(())
 }

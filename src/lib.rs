@@ -1,5 +1,7 @@
 #[macro_use]
 extern crate futures;
+#[macro_use]
+extern crate log;
 
 use anyhow::Context;
 use async_std::{fs::File as AsyncFile, io as async_io};
@@ -54,6 +56,7 @@ pub async fn generate_logs() -> anyhow::Result<()> {
 }
 
 async fn command(command: &str, args: &[&str], output: File) -> anyhow::Result<()> {
+    info!("fetching output from `{} {}`", command, args.join(" "));
     Command::new(command)
         .args(args)
         .stdin(Stdio::null())
@@ -68,6 +71,7 @@ async fn command(command: &str, args: &[&str], output: File) -> anyhow::Result<(
 }
 
 async fn copy(source: &Path, dest: &Path) -> anyhow::Result<()> {
+    info!("copying logs from {}", source.display());
     let source = async move { AsyncFile::open(source).await.context("failed to open source") };
 
     let dest = async move { AsyncFile::create(dest).await.context("failed to create dest") };
