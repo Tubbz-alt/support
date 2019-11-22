@@ -23,6 +23,7 @@ pub async fn generate_logs() -> anyhow::Result<()> {
         lsusb(tempfile(temppath, "lsusb")?),
         dmesg(tempfile(temppath, "dmesg")?),
         journalctl(tempfile(temppath, "journalctl")?),
+        upower(tempfile(temppath, "upower")?),
         copy(Path::new("/var/log/Xorg.0.log"), xorg_log),
         copy(Path::new("/var/log/syslog"), syslog),
     )?;
@@ -32,7 +33,16 @@ pub async fn generate_logs() -> anyhow::Result<()> {
         .arg(temppath)
         .arg("-Jpcf")
         .arg("system76-logs.tar.xz")
-        .args(&["dmidecode", "lspci", "lsusb", "dmesg", "journalctl", "Xorg.0.log", "syslog"])
+        .args(&[
+            "dmidecode",
+            "lspci",
+            "lsusb",
+            "dmesg",
+            "journalctl",
+            "upower",
+            "Xorg.0.log",
+            "syslog",
+        ])
         .status()
         .await
         .context("tar failed to spawn")?
@@ -74,6 +84,8 @@ async fn journalctl(file: File) -> anyhow::Result<()> {
 async fn lspci(file: File) -> anyhow::Result<()> { command("lspci", &["-vv"], file).await }
 
 async fn lsusb(file: File) -> anyhow::Result<()> { command("lsusb", &["-vv"], file).await }
+
+async fn upower(file: File) -> anyhow::Result<()> { command("upower", &["-d"], file).await }
 
 fn tempfile(path: &Path, command: &str) -> anyhow::Result<File> {
     File::create(path.join(command))
