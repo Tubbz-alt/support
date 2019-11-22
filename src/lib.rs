@@ -14,6 +14,7 @@ pub async fn generate_logs() -> anyhow::Result<()> {
     let tempdir = tempfile::tempdir().context("failed to fetch temporary directory")?;
     let temppath = tempdir.path();
 
+    let apt_history = &temppath.join("apt_history");
     let xorg_log = &temppath.join("Xorg.0.log");
     let syslog = &temppath.join("syslog");
 
@@ -24,6 +25,7 @@ pub async fn generate_logs() -> anyhow::Result<()> {
         dmesg(tempfile(temppath, "dmesg")?),
         journalctl(tempfile(temppath, "journalctl")?),
         upower(tempfile(temppath, "upower")?),
+        copy(Path::new("/var/log/apt/history.log"), apt_history),
         copy(Path::new("/var/log/Xorg.0.log"), xorg_log),
         copy(Path::new("/var/log/syslog"), syslog),
     )?;
@@ -34,14 +36,15 @@ pub async fn generate_logs() -> anyhow::Result<()> {
         .arg("-Jpcf")
         .arg("system76-logs.tar.xz")
         .args(&[
+            "apt_history",
+            "dmesg",
             "dmidecode",
+            "journalctl",
             "lspci",
             "lsusb",
-            "dmesg",
-            "journalctl",
+            "syslog",
             "upower",
             "Xorg.0.log",
-            "syslog",
         ])
         .status()
         .await
