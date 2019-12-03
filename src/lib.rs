@@ -6,11 +6,8 @@ extern crate log;
 use anyhow::Context;
 use async_std::{fs::File as AsyncFile, io as async_io};
 use exit_status_ext::ExitStatusExt;
-
-use std::{fs::File, path::Path, process::Stdio};
-
-// NOTE: switch to async-std when it supports Command.
-use tokio::net::process::Command;
+use pidfd::PidFd;
+use std::{fs::File, path::Path, process::{Command, Stdio}};
 
 pub async fn generate_logs() -> anyhow::Result<()> {
     let tempdir = tempfile::tempdir().context("failed to fetch temporary directory")?;
@@ -48,10 +45,12 @@ pub async fn generate_logs() -> anyhow::Result<()> {
             "upower",
             "Xorg.0.log",
         ])
-        .status()
-        .await
+        .spawn()
+        .map(|child| PidFd::from(&child))
         .context("tar failed to spawn")?
-        .as_result()
+        .into_future()
+        .await
+        .and_then(ExitStatusExt::as_result)
         .context("tar exited in failure")
 }
 
@@ -62,12 +61,13 @@ async fn command(command: &str, args: &[&str], output: File) -> anyhow::Result<(
         .stdin(Stdio::null())
         .stderr(Stdio::null())
         .stdout(output)
-        .status()
-        .await
+        .spawn()
+        .map(|child| PidFd::from(&child))
         .with_context(|| format!("{} failed to spawn", command))?
-        .as_result()
+        .into_future()
+        .await
+        .and_then(ExitStatusExt::as_result)
         .with_context(|| format!("{} exited in failure", command))
-        .map(|_| ())
 }
 
 async fn copy(source: &Path, dest: &Path) -> anyhow::Result<()> {

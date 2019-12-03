@@ -1,15 +1,14 @@
 #[macro_use]
 extern crate anyhow;
 
+use futures::executor;
 use clap::{App, AppSettings, SubCommand};
 use fern::{Dispatch, InitError};
 use std::{io, process::exit};
 
-// NOTE: use async_std::task::block_on as soon as it supports process::Command.
-use tokio::runtime::current_thread::Runtime;
-
 fn main() {
-    Runtime::new().unwrap().block_on(async move {
+    better_panic::install();
+    executor::block_on(async move {
         if let Err(why) = main_().await {
             eprintln!("{:#?}", why);
             exit(1)
@@ -42,7 +41,7 @@ fn install_logger() -> Result<(), InitError> {
     Dispatch::new()
         .level(log::LevelFilter::Off)
         .level_for("system76_support", log::LevelFilter::Info)
-        .format(move |out, message, record| {
+        .format(move |out, message, _record| {
             out.finish(format_args!(
                 "{}",
                 message
