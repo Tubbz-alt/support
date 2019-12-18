@@ -32,7 +32,7 @@ async fn main_() -> anyhow::Result<()> {
         .get_matches();
 
     match matches.subcommand() {
-        ("logs", _) => system76_support::generate_logs().await,
+        ("logs", _) => system76_support::logs::generate().await,
         _ => unreachable!(),
     }
 }

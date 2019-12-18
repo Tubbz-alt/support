@@ -7,10 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-exit-status-ext = { git = "https://github.com/pop-os/exit-status-ext" }
-gtk = "0.7"
-gio = "0.7"
-glib = "0.8"
+as-result = "0.2"
 cascade = "0.1"
 futures = "0.3"
 anyhow = "1"
