@@ -7,15 +7,19 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-as-result = "0.2"
-cascade = "0.1"
-futures = "0.3"
 anyhow = "1"
-libc = "0.2"
-tempfile = "3"
+as-result = "0.2"
 async-std = "1"
-clap = "2"
-log = "0.4"
-fern = "0.5"
-pidfd = "0.2"
 better-panic = "0.2"
+cascade = "0.1"
+clap = "2"
+deb-control = { git = "https://github.com/pop-os/deb-control" }
+deb-diversion = { git = "https://github.com/pop-os/deb-diversion" }
+fern = "0.5"
+futures = "0.3"
+futures_codec = { git = "https://github.com/mmstick/futures-codec", branch = "eof" }
+libc = "0.2"
+log = "0.4"
+pidfd = "0.2"
+tempfile = "3"
+twoway = "0.2.1"

@@ -1,8 +1,12 @@
 use anyhow::Context;
-use async_std::{fs::File as AsyncFile, io as async_io};
 use as_result::IntoResult;
+use async_std::{fs::File as AsyncFile, io as async_io};
 use pidfd::PidFd;
-use std::{fs::File, path::Path, process::{Command, Stdio}};
+use std::{
+    fs::File,
+    path::Path,
+    process::{Command, Stdio},
+};
 
 pub async fn generate() -> anyhow::Result<()> {
     let tempdir = tempfile::tempdir().context("failed to fetch temporary directory")?;
