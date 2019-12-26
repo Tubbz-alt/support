@@ -18,10 +18,6 @@ fn main() {
 }
 
 async fn main_() -> anyhow::Result<()> {
-    if unsafe { libc::getuid() != 0 } {
-        return Err(anyhow!("root is required for this operation"));
-    }
-
     if let Err(why) = install_logger() {
         eprintln!("failed to set up logging: {}", why);
     }
@@ -38,6 +34,10 @@ async fn main_() -> anyhow::Result<()> {
                 .subcommand(SubCommand::with_name("nvidia").about("reinstall NVIDIA drivers")),
         )
         .get_matches();
+
+    if unsafe { libc::getuid() != 0 } {
+        return Err(anyhow!("root is required for this operation"));
+    }
 
     match matches.subcommand() {
         ("logs", _) => logs::generate().await,
