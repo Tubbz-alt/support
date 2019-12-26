@@ -1,2 +1,10 @@
-/target
+.cargo/
+target/
+vendor/
+vendor.tar
 **/*.rs.bk
+debian/*
+!debian/source/
+!debian/changelog
+!debian/control
+!debian/rules
